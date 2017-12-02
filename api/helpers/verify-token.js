@@ -37,7 +37,6 @@ module.exports = {
 				if (!user) return exits.invalid()
 				// otherwise save the user object on the request (i.e. "log in") and continue
 				req.user = user
-				console.log('COOOOOOOOOKIIIIIIIIIIIEEEEEEEEEEEEEE')
 				return exits.success(user)
 			})
 		}
@@ -54,7 +53,6 @@ module.exports = {
 				if (!user) return exits.invalid()
 				// if it got this far, everything checks out, success
 				req.user = user
-				console.log('HEEEEEEEAAAAAAAAAAADDDDDEEEEEEEEEEEERR')
 				return exits.success(user)
 			})
 		}
