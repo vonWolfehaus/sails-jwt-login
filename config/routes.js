@@ -24,13 +24,13 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  '/': 'PageController.main',
-  'get /home': 'PageController.home',
+  'get /': 'PageController.home',
   'get /login': 'PageController.login',
-  'get /signup': 'PageController.signup',
-  '/welcome': 'PageController.welcome',
-  '/logout': 'PageController.logout',
-  '/profile': 'PageController.profile',
+  'get /register': 'PageController.register',
+  'get /home': 'PageController.home',
+  'get /welcome': 'PageController.welcome',
+  'get /logout': 'PageController.logout',
+  'get /profile': 'PageController.profile',
 
   /***************************************************************************
   *                                                                          *
@@ -48,8 +48,9 @@ module.exports.routes = {
   //  ╠═╣╠═╝║  ║╣ ║║║ ║║╠═╝║ ║║║║║ ║ ╚═╗
   //  ╩ ╩╩  ╩  ╚═╝╝╚╝═╩╝╩  ╚═╝╩╝╚╝ ╩ ╚═╝
 
-  'post /login': 'UserController.login',
-  'post /signup': 'UserController.signup',
+  'patch /api/users/login': 'UserController.login',
+  'patch /api/users/logout': 'PageController.logout',
+  'post /api/users/register': 'UserController.register',
 
   //  ╦ ╦╔═╗╔╗ ╦ ╦╔═╗╔═╗╦╔═╔═╗
   //  ║║║║╣ ╠╩╗╠═╣║ ║║ ║╠╩╗╚═╗

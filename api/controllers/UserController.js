@@ -5,89 +5,82 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-var jwt = require('jsonwebtoken');
+var bcrypt = require('bcryptjs')
+var jwt = require('jsonwebtoken')
+var Emailaddresses = require('machinepack-emailaddresses')
+
 module.exports = {
+	// patch /login
+	login: async function(req, res) {
+		var user = await User.findOne({
+			email: req.param('email')
+		})
+		if (!user) return res.notFound()
 
-  /**
-   * `UserController.login()`
-   */
-  login: function (req, res) {
+		await bcrypt.compare(req.param('password'), user.password)
 
-    // Look up the user
-    User.attemptLogin({
-      email: req.param('email'),
-      password: req.param('password'),
-    }, function (err, user) {
-      if (err) return res.negotiate(err);
-      if (!user) {
+		// if no errors were thrown, then grant them a new token
+		// set these config vars in config/local.js, or preferably in config/env/production.js as an environment variable
+		var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires})
+		// set a cookie on the client side that they can't modify unless they sign out (just for web apps)
+		res.cookie('sailsjwt', token, { signed:true })
+		// provide the token to the client in case they want to store it locally to use in the header (eg mobile/desktop apps)
+		return res.ok(token)
+	},
 
-        // If this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
-        // send a 200 response letting the user agent know the login was successful.
-        // (also do this if no `invalidRedirect` was provided)
-        if (req.wantsJSON || !inputs.invalidRedirect) {
-          return res.badRequest('Invalid username/password combination.');
-        }
-        // Otherwise if this is an HTML-wanting browser, redirect to /login.
-        return res.view('login');
-      }
+	/**
+	 * There is no logout because jsonwebtoken doesn't have a revoke function :(
+	 * There's also no session to reset, so the token will just expire, or the client will forget it
+	 * and eventually need to ask for a new one.
+	 */
+	logout: async function(req, res) {
+		res.cookie('sailsjwt', '', { signed:true })
+		req.user = null
+		console.log(req.signedCookies)
+		return res.ok()
+	},
 
-      var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires});
-      return res.ok(token);
+	// post /users/register
+	register: function(req, res) {
+		if (_.isUndefined(req.param('email'))) {
+			return res.badRequest('An email address is required.')
+		}
 
-    });
+		if (_.isUndefined(req.param('password'))) {
+			return res.badRequest('A password is required.')
+		}
 
-  },
+		if (req.param('password').length < 8) {
+			return res.badRequest('Password must be at least 8 characters.')
+		}
 
+		Emailaddresses.validate({
+			string: req.param('email'),
+		}).exec({
+			error: function(err) {
+				return res.serverError(err)
+			},
+			invalid: function() {
+				return res.badRequest('Doesn\'t look like an email address.')
+			},
+			success: async function() {
+				var user = await sails.helpers.createUser({
+					email: req.param('email'),
+					password: req.param('password'),
+				})
 
-  /**
-   * `UserController.logout()`
-   */
-  logout: function (req, res) {
+				// after creating a user record, log them in at the same time by issuing their first jwt token
+				var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires})
 
-    // "Forget" the user from the session.
-    // Subsequent requests from this user agent will NOT have `req.session.me`.
-    req.session.me = null;
+				// if this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
+				// send a 200 response letting the user agent know the signup was successful.
+				if (req.wantsJSON) {
+					return res.ok(token)
+				}
 
-    // If this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
-    // send a simple response letting the user agent know they were logged out
-    // successfully.
-    if (req.wantsJSON) {
-      return res.ok('Logged out successfully!');
-    }
-
-    // Otherwise if this is an HTML-wanting browser, do a redirect.
-    return res.redirect('/');
-  },
-
-
-  /**
-   * `UserController.signup()`
-   */
-  signup: function (req, res) {
-
-    // Attempt to signup a user using the provided parameters
-    User.signup({
-      name: req.param('name'),
-      email: req.param('email'),
-      password: req.param('password')
-    }, function (err, user) {
-      // res.negotiate() will determine if this is a validation error
-      // or some kind of unexpected server error, then call `res.badRequest()`
-      // or `res.serverError()` accordingly.
-      if (err) return res.negotiate(err);
-
-      // Go ahead and log this user in as well.  We do this by issuing a JWT token for them.
-      var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires});
-
-      // If this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
-      // send a 200 response letting the user agent know the signup was successful.
-      if (req.wantsJSON) {
-        return res.ok(token);
-      }
-
-      // Otherwise if this is an HTML-wanting browser, redirect to /welcome.
-      return res.redirect('/welcome');
-    });
-  }
-};
-
+				// otherwise if this is an HTML-wanting browser, redirect to /welcome.
+				return res.redirect('/welcome')
+			}
+		})
+	},
+}

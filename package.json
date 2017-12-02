@@ -1,19 +1,23 @@
 {
-  "name": "sails-jwt-auth",
+  "name": "sails-jwt-login",
   "private": true,
   "version": "0.0.0",
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
-    "sails": "^1.0.0-41",
+    "async": "2.0.1",
+    "bcryptjs": "^2.4.3",
+    "connect-redis": "3.2.0",
     "grunt": "1.0.1",
+    "jsonwebtoken": "^8.1.0",
+    "lodash": "3.10.1",
+    "machinepack-emailaddresses": "^0.4.0",
+    "machinepack-passwords": "^2.3.0",
+    "sails": "^1.0.0-41",
+    "sails-hook-grunt": "^2.0.0",
     "sails-hook-orm": "^2.0.0-16",
     "sails-hook-sockets": "^1.4.0",
-    "sails-hook-grunt": "^2.0.0",
-    "connect-redis": "3.2.0",
-    "socket.io-redis": "4.0.0",
-    "lodash": "3.10.1",
-    "async": "2.0.1"
+    "socket.io-redis": "4.0.0"
   },
   "devDependencies": {
     "eslint": "3.19.0"
@@ -28,7 +32,7 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/anonymous node/sails user/sails-jwt-auth.git"
+    "url": "git://github.com/anonymous node/sails user/sails-jwt-login.git"
   },
   "author": "anonymous node/sails user",
   "license": "",
