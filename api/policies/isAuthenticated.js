@@ -15,16 +15,17 @@ module.exports = async function(req, res, next) {
 		res: res
 	})
 	.switch({
-		error: function(err) { return res.serverError(err) },
-		invalid: function(err) { return res.redirect('/login') },
-		notAuthenticated: function(err) {
-			// If this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
+		error: function(err) {
+			return res.serverError(err)
+		},
+		invalid: function(err) {
+			// if this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
 			// send a 401 response letting the user agent know they need to login to
 			// access this endpoint.
 			if (req.wantsJSON) {
 				return res.sendStatus(401)
 			}
-			// Otherwise if this is an HTML-wanting browser, do a redirect.
+			// otherwise if this is an HTML-wanting browser, do a redirect.
 			return res.redirect('/login')
 		},
 		success: function() {

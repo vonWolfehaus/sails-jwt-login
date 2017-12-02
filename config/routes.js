@@ -49,7 +49,7 @@ module.exports.routes = {
   //  ╩ ╩╩  ╩  ╚═╝╝╚╝═╩╝╩  ╚═╝╩╝╚╝ ╩ ╚═╝
 
   'patch /api/users/login': 'UserController.login',
-  'patch /api/users/logout': 'PageController.logout',
+  'patch /api/users/logout': 'UserController.logout',
   'post /api/users/register': 'UserController.register',
 
   //  ╦ ╦╔═╗╔╗ ╦ ╦╔═╗╔═╗╦╔═╔═╗

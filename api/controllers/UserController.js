@@ -10,7 +10,7 @@ var jwt = require('jsonwebtoken')
 var Emailaddresses = require('machinepack-emailaddresses')
 
 module.exports = {
-	// patch /login
+	// patch /api/users/login
 	login: async function(req, res) {
 		var user = await User.findOne({
 			email: req.param('email')
@@ -23,24 +23,23 @@ module.exports = {
 		// set these config vars in config/local.js, or preferably in config/env/production.js as an environment variable
 		var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires})
 		// set a cookie on the client side that they can't modify unless they sign out (just for web apps)
-		res.cookie('sailsjwt', token, { signed:true })
+		res.cookie('sailsjwt', token, {
+			signed: true,
+			// domain: '.yourdomain.com', // always use this in production to whitelist your domain
+			maxAge: sails.config.jwtExpires
+		})
 		// provide the token to the client in case they want to store it locally to use in the header (eg mobile/desktop apps)
 		return res.ok(token)
 	},
 
-	/**
-	 * There is no logout because jsonwebtoken doesn't have a revoke function :(
-	 * There's also no session to reset, so the token will just expire, or the client will forget it
-	 * and eventually need to ask for a new one.
-	 */
-	logout: async function(req, res) {
-		res.cookie('sailsjwt', '', { signed:true })
+	// patch /api/users/logout
+	logout: function(req, res) {
+		res.clearCookie('sailsjwt')
 		req.user = null
-		console.log(req.signedCookies)
 		return res.ok()
 	},
 
-	// post /users/register
+	// post /api/users/register
 	register: function(req, res) {
 		if (_.isUndefined(req.param('email'))) {
 			return res.badRequest('An email address is required.')
@@ -69,8 +68,13 @@ module.exports = {
 					password: req.param('password'),
 				})
 
-				// after creating a user record, log them in at the same time by issuing their first jwt token
+				// after creating a user record, log them in at the same time by issuing their first jwt token and setting a cookie
 				var token = jwt.sign({user: user.id}, sails.config.jwtSecret, {expiresIn: sails.config.jwtExpires})
+				res.cookie('sailsjwt', token, {
+					signed: true,
+					// domain: '.yourdomain.com', // always use this in production to whitelist your domain
+					maxAge: sails.config.jwtExpires
+				})
 
 				// if this is not an HTML-wanting browser, e.g. AJAX/sockets/cURL/etc.,
 				// send a 200 response letting the user agent know the signup was successful.

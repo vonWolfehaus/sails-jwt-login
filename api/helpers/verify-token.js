@@ -19,10 +19,7 @@ module.exports = {
 	},
 	exits: {
 		invalid: {
-			description: 'Invalid token.',
-		},
-		notAuthenticated: {
-			description: 'Not authenticated.'
+			description: 'Invalid token or no authentication present.',
 		}
 	},
 	fn: function(inputs, exits) {
@@ -30,15 +27,15 @@ module.exports = {
 		var res = inputs.res
 		// first check for a cookie (web client)
 		if (req.signedCookies.sailsjwt) {
-			// If there is something, attempt to parse it as a JWT token
+			// if there is something, attempt to parse it as a JWT token
 			return jwt.verify(req.signedCookies.sailsjwt, sails.config.jwtSecret, async function(err, payload) {
-				// If there's an error verifying the token (e.g. it's invalid or expired), redirect to the login page.
+				// if there's an error verifying the token (e.g. it's invalid or expired), no go
 				if (err || !payload.user) return exits.invalid()
-				// Otherwise try to look up that user
+				// otherwise try to look up that user
 				var user = await User.findOne(payload.user)
-				// If the user can't be found, redirect to the login page
+				// if the user can't be found, no go
 				if (!user) return exits.invalid()
-				// Otherwise save the user object on the request (i.e. "log in") and continue
+				// otherwise save the user object on the request (i.e. "log in") and continue
 				req.user = user
 				console.log('COOOOOOOOOKIIIIIIIIIIIEEEEEEEEEEEEEE')
 				return exits.success(user)
@@ -46,20 +43,22 @@ module.exports = {
 		}
 		// no? then check for a JWT token in the header
 		if (req.header('authorization')) {
-			// If one exists, attempt to get the header data
+			// if one exists, attempt to get the header data
 			var token = req.header('authorization').split('Bearer ')[1]
-			// If there's nothing after "Bearer", just redirect to login
+			// if there's nothing after "Bearer", no go
 			if (!token) return exits.invalid()
-			// If there is something, attempt to parse it as a JWT token
+			// if there is something, attempt to parse it as a JWT token
 			return jwt.verify(token, sails.config.jwtSecret, async function(err, payload) {
 				if (err || !payload.user) return exits.invalid()
 				var user = await User.findOne(payload.user)
 				if (!user) return exits.invalid()
+				// if it got this far, everything checks out, success
 				req.user = user
 				console.log('HEEEEEEEAAAAAAAAAAADDDDDEEEEEEEEEEEERR')
 				return exits.success(user)
 			})
 		}
-		return exits.notAuthenticated()
+		// if neither a cookie nor auth header are present, then there was no attempt to authenticate
+		return exits.invalid()
 	}
 }

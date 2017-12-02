@@ -14,10 +14,11 @@ module.exports = function(req, res, next) {
 		res: res
 	})
 	.switch({
-		error: function(err) { return res.serverError(err) },
-		invalid: function(err) { return next() },
-		notAuthenticated: function(err) {
-			// No token, no problem -- just continue in a logged-out state
+		error: function(err) {
+			return res.serverError(err)
+		},
+		invalid: function(err) {
+			// no token, no problem -- just continue in a logged-out state
 			return next()
 		},
 		success: function() {

@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	// When the "submit" button is clicked on the login page, attempt to log in
-	$( document ).on( 'click', '#submitLogin', function onSubmitLogin(e) {
+	$(document).on('click', '#submitLogin', function onSubmitLogin(e) {
 		$('#errors').html('')
 		e.preventDefault()
 		$.ajax('/api/users/login', {
@@ -13,8 +13,6 @@ $(document).ready(function() {
 			}),
 			// If the login is successful, save the JWT token and load the home page
 			success: function(newToken) {
-				console.log(newToken)
-				// localStorage.setItem('jwttoken', newToken)
 				window.location = '/'
 			},
 			// If not, update the "errors" section on the page
@@ -24,7 +22,7 @@ $(document).ready(function() {
 		})
 	})
 
-	$( document ).on( 'click', '#submitLogout', function onSubmitLogout(e) {
+	$(document).on('click', '#submitLogout', function onSubmitLogout(e) {
 		$('#errors').html('')
 		e.preventDefault()
 		$.ajax('/api/users/logout', {
@@ -32,7 +30,6 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			processData: false,
 			success: function() {
-				// localStorage.removeItem('jwttoken')
 				window.location = '/'
 			},
 			// If not, update the "errors" section on the page
@@ -43,7 +40,7 @@ $(document).ready(function() {
 	})
 
 	// When the "submit" button is clicked on the signup page, attempt to sign up
-	$( document ).on( 'click', '#submitSignup', function onSubmitSignup(e) {
+	$(document).on('click', '#submitSignup', function onSubmitSignup(e) {
 		$('#errors').html('')
 		e.preventDefault()
 		$.ajax('/api/users/register', {
@@ -56,8 +53,6 @@ $(document).ready(function() {
 			}),
 			// If the signup is successful, save the JWT token and load the welcome page
 			success: function(newToken) {
-				console.log(newToken)
-				// localStorage.setItem('jwttoken', newToken)
 				window.location = '/welcome'
 			},
 			// If not, update the "errors" section on the page
