@@ -1,3 +1,7 @@
+# NOTE: This is no longer maintained
+
+There's security issues with this since it's so old.
+
 # sails-jwt-login
 
 This is an example of a simple device-agnostic backend that implements login, signup, and logout using [JSON Web Tokens](https://jwt.io/introduction/).  It is based on the [jwt-login](https://github.com/sails101/jwt-login) example, just upgraded to Sails 1.0 and modified to use cookies for web storage and the authorization header for other devices (eg mobile) to use.
